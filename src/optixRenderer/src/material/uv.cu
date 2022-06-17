@@ -37,55 +37,26 @@
 
 using namespace optix;
 
-rtDeclareVariable( float3, shading_normal, attribute shading_normal, ); 
-rtDeclareVariable( float3, geometric_normal, attribute geometric_normal, );
-rtDeclareVariable(float3, tangent_direction, attribute tangent_direction, );
-rtDeclareVariable(float3, bitangent_direction, attribute bitangent_direction, );
+rtDeclareVariable(float3,       cameraW, , );
+
 rtDeclareVariable( float3, texcoord, attribute texcoord, );
+rtDeclareVariable( float, t_hit, rtIntersectionDistance, );
+
 rtDeclareVariable(optix::Ray, ray,   rtCurrentRay, );
 rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 rtDeclareVariable(PerRayData_shadow,   prd_shadow, rtPayload, );
+rtDeclareVariable(float, scene_epsilon, , ); 
 
 rtDeclareVariable( float, uvScale, , ); 
-rtTextureSampler<float4, 2> normalMap;
-rtDeclareVariable(int, isNormalTexture, , );
-rtDeclareVariable(float, F0, , );
 
-rtDeclareVariable( float3, cameraU, , );
-rtDeclareVariable( float3, cameraV, , );
-rtDeclareVariable( float3, cameraW, , );
 
 RT_PROGRAM void closest_hit_radiance()
-{
-    const float3 world_shading_normal   = normalize( rtTransformNormal( RT_OBJECT_TO_WORLD, shading_normal ) );
-    const float3 world_geometric_normal = normalize( rtTransformNormal( RT_OBJECT_TO_WORLD, geometric_normal ) );
-    float3 ffnormal = faceforward( world_shading_normal, -ray.direction, world_geometric_normal );
-    
-    float3 V = normalize(-ray.direction );    
-    
-    if(dot(ffnormal, V) < 0)
-        ffnormal = -ffnormal;
-
-    float3 N;
-    if( isNormalTexture == 0){
-        N = ffnormal;
-    }
-    else{
-        N = make_float3(tex2D(normalMap, texcoord.x * uvScale, texcoord.y * uvScale) );
-        N = normalize(2 * N - 1);
-        N = N.x * tangent_direction 
-            + N.y * bitangent_direction 
-            + N.z * ffnormal;
-    }
-    N = normalize(N );
-
-
-    float3 Z = normalize(-cameraW);
-    float3 X = normalize(cameraU);
-    float3 Y = normalize(cameraV);
-    N = make_float3( dot(N, X), dot(N, Y), dot(N, Z) );
-
-    prd_radiance.radiance = 0.5 * (N + 1);
+{ 
+    float3 uv = make_float3(
+            texcoord.x * uvScale, 
+            texcoord.y * uvScale, 
+            1.0 );  
+    prd_radiance.radiance = uv;
     prd_radiance.done = true;
 }
 

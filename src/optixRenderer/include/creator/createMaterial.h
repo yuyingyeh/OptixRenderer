@@ -43,5 +43,7 @@ Material createMetallicMaterial(Context& context, material_t mat);
 
 Material createDepthMaterial(Context& context );
 
+Material createUvMaterial(Context& context, material_t  mat );
+
 
 #endif

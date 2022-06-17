@@ -145,6 +145,26 @@ bool writeBufferToFile(const char* fileName, float* imgData, int width, int heig
         delete [] image;
 
         return true;
+    } 
+
+    if(mode == 7 ){
+        std::ofstream uvOut(fileName, std::ios::out|std::ios::binary);
+        uvOut.write((char*)&height, sizeof(int) );
+        uvOut.write((char*)&width, sizeof(int) );
+
+        float* image = new float[width * height * 2 ];
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
+                image[2*(i*width + j ) ] = imgData[3 * ( (height-1-i) * width +j ) ];
+                image[2*(i*width + j ) + 1] = imgData[3 * ( (height-1-i) * width +j ) + 1 ]; 
+            }
+        }
+        std::cout<<std::endl;
+        uvOut.write( (char*)image, sizeof(float) * width * height * 2 );
+        uvOut.close();
+        delete [] image;
+
+        return true;
     }
 
     if(isHdr){
@@ -226,7 +246,7 @@ std::string generateOutputFilename(std::string fileName, int mode, bool isHdr, i
     else if(mode == 1 || mode == 2 || mode == 3 || mode == 4 || mode == 6){
         suffix = std::string("png");
     }
-    else if(mode == 5){
+    else if(mode == 5 or mode == 7){
         suffix = std::string("dat");
     }
 
@@ -239,6 +259,7 @@ std::string generateOutputFilename(std::string fileName, int mode, bool isHdr, i
         case 4: modeString = "mask"; break;
         case 5: modeString = "depth"; break;
         case 6: modeString = "metallic"; break;
+        case 7: modeString = "uvcoord"; break; 
     }
 
     if(camNum > 0){

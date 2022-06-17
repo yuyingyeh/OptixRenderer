@@ -61,6 +61,8 @@ OPTIX_add_sample_executable( optixRenderer
     material/albedo.cu
     material/depth.cpp
     material/depth.cu
+    material/uv.cpp
+    material/uv.cu
     material/diffuse.cpp
     material/diffuse.cu
     material/mask.cpp
