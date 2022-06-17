@@ -7,19 +7,19 @@
 #include <vector>
 #include <algorithm>
 #include <map>
-#include <stdio.h>
+#include <stdio.h> 
+#include <string>
 #include "creator/createMaterial.h"
 #include "creator/createAreaLight.h"
 #include "shapeStructs.h"
 
-const int faceLimit = 100000;
-
-void splitShapes(shape_t& shapeLarge, std::vector<shape_t >& shapeArr);
 
 void createGeometry(
         Context& context,
         const std::vector<shape_t>& shapes,
         const std::vector<material_t>& materials,
-        int mode );
+        int mode, 
+        std::map<std::string, int>& modelId
+        );
 
 #endif

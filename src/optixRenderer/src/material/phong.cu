@@ -54,8 +54,6 @@ rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 rtDeclareVariable(PerRayData_shadow,   prd_shadow, rtPayload, );
 rtDeclareVariable(float, scene_epsilon, , );
 
-rtDeclareVariable( float, uvScale, , ); 
-
 // Materials
 rtDeclareVariable( float3, albedo, , );
 rtTextureSampler<float4, 2> albedoMap;
@@ -180,7 +178,7 @@ RT_PROGRAM void closest_hit_radiance()
         albedoValue = albedo;
     }
     else{
-        albedoValue = make_float3(tex2D(albedoMap, texcoord.x * uvScale, texcoord.y * uvScale ) );
+        albedoValue = make_float3(tex2D(albedoMap, texcoord.x, texcoord.y) );
         albedoValue.x = pow(albedoValue.x, 2.2);
         albedoValue.y = pow(albedoValue.y, 2.2);
         albedoValue.z = pow(albedoValue.z, 2.2);
@@ -191,7 +189,7 @@ RT_PROGRAM void closest_hit_radiance()
         specularValue = specular;
     }
     else{
-        specularValue = make_float3(tex2D(specularMap, texcoord.x * uvScale, texcoord.y * uvScale) );
+        specularValue = make_float3(tex2D(specularMap, texcoord.x, texcoord.y) );
         specularValue.x = pow(specularValue.x, 2.2);
         specularValue.y = pow(specularValue.y, 2.2);
         specularValue.z = pow(specularValue.z, 2.2);
@@ -306,7 +304,7 @@ RT_PROGRAM void closest_hit_radiance()
             sampleEnvironmapLight(prd_radiance.seed, radiance, L, pdfSolidEnv);
 
             if( fmaxf(dot(L, N), 0.0) * fmaxf(dot(V, N), 0.0) > 0){
-                Ray shadowRay = make_Ray(hitPoint + 0.1 * scene_epsilon * L, L, 1, scene_epsilon, infiniteFar);
+                Ray shadowRay = make_Ray(hitPoint + 0.1 * scene_epsilon, L, 1, scene_epsilon, infiniteFar);
                 PerRayData_shadow prd_shadow;
                 prd_shadow.inShadow = false;
                 rtTrace(top_object, shadowRay, prd_shadow);

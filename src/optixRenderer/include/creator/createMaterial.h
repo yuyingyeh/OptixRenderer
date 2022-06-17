@@ -25,8 +25,6 @@ Material createMicrofacetMaterial(Context& context, material_t mat);
 
 Material createDielectricMaterial(Context& context, material_t mat);
 
-Material createConductorMaterial(Context& context, material_t mat);
-
 Material createWhiteMaterial(Context& context );
 
 Material createMaskMaterial(Context& context, bool isAreaLight );
@@ -41,7 +39,9 @@ Material createRoughnessMaterial(Context& context, material_t mat);
 
 Material createMetallicMaterial(Context& context, material_t mat);
 
-Material createDepthMaterial(Context& context );
+Material createDepthMaterial(Context& context ); 
+
+Material createMatPartMaterial(Context& context, int modelId, int matId, int shapeId );
 
 
 #endif

@@ -232,10 +232,10 @@ bool loadShapeFromXML(std::vector<shape_t>& shapes, std::vector<material_t>& mat
         }
     }
     // When no materials are defined in obj 
-    if(!shape.isLight ) { 
-        
+    if(!shape.isLight ) {  
         if(materialsShape.size() == 0 && matRefNames.size() == 0) {
             std::cout<<"Warning: no materials assigned to this shapes."<<std::endl;
+            /*
             for(int i = 0; i < shape.mesh.materialIds.size(); i++){
                 shape.mesh.materialIds[i] = 0;
             } 
@@ -243,6 +243,8 @@ bool loadShapeFromXML(std::vector<shape_t>& shapes, std::vector<material_t>& mat
                     shape.mesh.materialNames.end() );
             shape.mesh.materialNameIds.erase(shape.mesh.materialNameIds.begin(), 
                     shape.mesh.materialNameIds.end() );
+            */
+            ////// Only for rendering mat part, these checkings can be commented out
         }
         else{
             if(shape.mesh.materialNames.size() == 0){

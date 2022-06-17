@@ -42,7 +42,6 @@ rtDeclareVariable(optix::Ray, ray,   rtCurrentRay, );
 rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 rtDeclareVariable(PerRayData_shadow,   prd_shadow, rtPayload, );
 
-rtDeclareVariable( float, uvScale, , ); 
 rtDeclareVariable( float, rough, , );
 rtTextureSampler<float4, 2> roughMap;
 rtDeclareVariable( int, isRoughTexture, , );
@@ -50,7 +49,7 @@ rtDeclareVariable( int, isRoughTexture, , );
 RT_PROGRAM void closest_hit_radiance()
 {
     float roughValue = (isRoughTexture == 0) ? rough :
-        tex2D(roughMap, texcoord.x * uvScale, texcoord.y * uvScale).x;
+        tex2D(roughMap, texcoord.x, texcoord.y).x;
 
     prd_radiance.radiance = make_float3(roughValue );
     prd_radiance.done = true; 

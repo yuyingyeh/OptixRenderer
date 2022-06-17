@@ -115,6 +115,33 @@ void boundingBox(
     printf("Min X: %.3f Min Y: %.3f Min Z: %.3f \n", vmin.x, vmin.y, vmin.z);
     context["infiniteFar"] -> setFloat(infiniteFar);
     context["scene_epsilon"]->setFloat(infiniteFar / 1e6);
+} 
+
+
+bool readModelIds(std::string fileName, std::map<std::string, int>& modelIds )
+{
+    std::ifstream modelIn(fileName, std::ios::in);
+    if(!modelIn.is_open() ){
+        std::cout<<"Wrong: cannot open model file"<<std::endl;
+        return false;
+    }
+    int modelNum = 0;
+    modelIn >> modelNum;
+
+    for(int i = 0; i < modelNum; i++){
+        std::string catId;
+        std::string modelId; 
+        int id; 
+
+        modelIn>>catId;
+        modelIn>>modelId;
+        modelIn>>id;
+
+        std::string objName = catId + "_" + modelId + "_object";
+        modelIds[objName ] = id + 1;
+    }
+    modelIn.close();
+    return true;
 }
 
 float clip(float a, float min, float max){
@@ -142,6 +169,26 @@ bool writeBufferToFile(const char* fileName, float* imgData, int width, int heig
         }
         depthOut.write( (char*)image, sizeof(float) * width * height);
         depthOut.close();
+        delete [] image;
+
+        return true;
+    } 
+
+    if(mode == 7){
+        std::ofstream matOut(fileName, std::ios::out|std::ios::binary);
+        matOut.write((char*)&height, sizeof(int) );
+        matOut.write((char*)&width, sizeof(int) );
+
+        int* image = new int[width * height * 3];
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
+                for(int ch = 0; ch < 3; ch ++){
+                    image[3*(i * width + j) + ch] = imgData[3*( (height-1-i) * width + j) + ch];
+                }
+            }
+        }
+        matOut.write( (char*)image, sizeof(int) * width * height * 3);
+        matOut.close();
         delete [] image;
 
         return true;
@@ -174,7 +221,7 @@ bool writeBufferToFile(const char* fileName, float* imgData, int width, int heig
                 float r = imgData[ind];
                 float g = imgData[ind + 1]; 
                 float b = imgData[ind + 2];
-                if(mode == 0 || mode == 1){
+                if(mode == 0){
                     r = pow(r, 1.0f/2.2f);
                     g = pow(g, 1.0f/2.2f);
                     b = pow(b, 1.0f/2.2f);
@@ -189,7 +236,6 @@ bool writeBufferToFile(const char* fileName, float* imgData, int width, int heig
         } 
         cv::imwrite(fileName, image);
     }
-
     return true;
 }
 
@@ -226,7 +272,7 @@ std::string generateOutputFilename(std::string fileName, int mode, bool isHdr, i
     else if(mode == 1 || mode == 2 || mode == 3 || mode == 4 || mode == 6){
         suffix = std::string("png");
     }
-    else if(mode == 5){
+    else if(mode == 5 || mode == 7){
         suffix = std::string("dat");
     }
 
@@ -239,6 +285,7 @@ std::string generateOutputFilename(std::string fileName, int mode, bool isHdr, i
         case 4: modeString = "mask"; break;
         case 5: modeString = "depth"; break;
         case 6: modeString = "metallic"; break;
+        case 7: modeString = "cadmatobj"; break;
     }
 
     if(camNum > 0){
@@ -285,9 +332,9 @@ int main( int argc, char** argv )
 
     std::string fileName;
     std::string outputFileName;
+    std::string modelIdFileName = "/siggraphasia20dataset/models.txt";
     std::string cameraFile("");
-    int mode = 0; 
-    int maxIteration = -1;
+    int mode = 0;
     std::vector<int> gpuIds;
     float noiseLimit = 0.11;
     int vertexLimit = 150000;
@@ -392,6 +439,13 @@ int main( int argc, char** argv )
         else if(std::string(argv[i] ) == std::string("--forceOutput") ){
             isForceOutput = true;   
         }
+        else if(std::string(argv[i] ) == std::string("--modelIdFile") ){
+            if(i == argc - 1){
+                std::cout<<"Missing input variable"<<std::endl;
+                exit(1);
+            }
+            modelIdFileName = std::string(argv[++i] );
+        }
         else if(std::string(argv[i] ) == std::string("--rrBeginLength") ){
             if(i == argc - 1){
                 std::cout<<"Missing input variable"<<std::endl;
@@ -405,14 +459,7 @@ int main( int argc, char** argv )
                 exit(1);
             }
             maxPathLength = atoi(argv[++i] );
-        } 
-        else if(std::string(argv[i] ) == std::string("--maxIteration") ){
-            if(i == argc-1){
-                std::cout<<"Missing input variable"<<std::endl;
-                exit(1);
-            }
-            maxIteration = atoi(argv[++i] );
-        } 
+        }
         else if(std::string(argv[i] ) == std::string("--medianFilter") ){ 
             isMedianFilter = true;
         }
@@ -435,7 +482,7 @@ int main( int argc, char** argv )
         return false;
     }
     fileName = std::string(fileNameNew );
-    
+ 
     outputFileName = relativePath(fileName, outputFileName );
 
     std::cout<<"Input file name: "<<fileName<<std::endl;
@@ -524,7 +571,13 @@ int main( int argc, char** argv )
         context -> setDevices(gpuIds.begin(), gpuIds.end() );
     }
     boundingBox(context, shapes);
-    createGeometry(context, shapes, materials, mode);
+
+    std::map<std::string, int> modelIds;
+    bool isReadModel = readModelIds(modelIdFileName, modelIds );
+    if(isReadModel == false )
+        exit(1);
+
+    createGeometry(context, shapes, materials, mode, modelIds );
     createAreaLightsBuffer(context, shapes);
     createEnvmap(context, envmaps); 
     createPointLight(context, points);
@@ -540,7 +593,7 @@ int main( int argc, char** argv )
     else{
         camEp = std::max(std::min(camEnd, camNum), 0);
     }
-    
+
     for(int i = camSp; i < camEp; i++){ 
         std::string outputFileNameNew = generateOutputFilename(outputFileName, mode,
                 cameraInput.isHdr, i, camNum);
@@ -598,12 +651,7 @@ int main( int argc, char** argv )
             independentSampling(context, cameraInput.width, cameraInput.height, imgData, sampleNum, scale);
         }
         else if(cameraInput.sampleType == std::string("adaptive") ) {
-            int sampleNum = cameraInput.sampleNum; 
-            
-            if(maxIteration >= 1){
-                cameraInput.adaptiveSampler.maxIteration =  maxIteration; 
-            }
-
+            int sampleNum = cameraInput.sampleNum;
             bool isTooNoisy = adaptiveSampling(context, cameraInput.width, cameraInput.height, sampleNum, imgData, 
                     noiseLimit, noiseLimitEnabled, 
                     cameraInput.adaptiveSampler.maxIteration, 

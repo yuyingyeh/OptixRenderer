@@ -45,8 +45,6 @@ rtDeclareVariable( float3, texcoord, attribute texcoord, );
 rtDeclareVariable(optix::Ray, ray,   rtCurrentRay, );
 rtDeclareVariable(PerRayData_radiance, prd_radiance, rtPayload, );
 rtDeclareVariable(PerRayData_shadow,   prd_shadow, rtPayload, );
-
-rtDeclareVariable( float, uvScale, , ); 
 rtTextureSampler<float4, 2> normalMap;
 rtDeclareVariable(int, isNormalTexture, , );
 rtDeclareVariable(float, F0, , );
@@ -71,11 +69,11 @@ RT_PROGRAM void closest_hit_radiance()
         N = ffnormal;
     }
     else{
-        N = make_float3(tex2D(normalMap, texcoord.x * uvScale, texcoord.y * uvScale) );
+        N = make_float3(tex2D(normalMap, texcoord.x, texcoord.y) );
         N = normalize(2 * N - 1);
         N = N.x * tangent_direction 
             + N.y * bitangent_direction 
-            + N.z * ffnormal; 
+            + N.z * ffnormal;
     }
     N = normalize(N );
 

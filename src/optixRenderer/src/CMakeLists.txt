@@ -77,8 +77,8 @@ OPTIX_add_sample_executable( optixRenderer
     material/roughness.cu
     material/dielectric.cpp
     material/dielectric.cu
-    material/conductor.cpp
-    material/conductor.cu
+    material/matPart.cpp
+    material/matPart.cu
 
     sampler/sampler.cpp
 

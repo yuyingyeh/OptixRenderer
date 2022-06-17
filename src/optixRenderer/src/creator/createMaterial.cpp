@@ -13,7 +13,7 @@ void loadEmptyToTextureSampler(Context& context,  TextureSampler& Sampler){
 }
 
 Material createDefaultMaterial(Context& context ){
-    const std::string ptx_path = ptxPath( "microfacet.cu" );
+    const std::string ptx_path = ptxPath( "diffuse.cu" );
     Program ch_program = context->createProgramFromPTXFile( ptx_path, "closest_hit_radiance" );
     Program ah_program = context->createProgramFromPTXFile( ptx_path, "any_hit_shadow" );
 
@@ -25,27 +25,13 @@ Material createDefaultMaterial(Context& context ){
     TextureSampler albedoSampler = createTextureSampler(context);
     material["isAlbedoTexture"] -> setInt(0);   
     loadEmptyToTextureSampler(context, albedoSampler);
-    material["albedo"] -> setFloat(0.8, 0.8, 0.8 );
+    material["albedo"] -> setFloat(0.5, 0.5, 0.5 );
     material["albedoMap"] -> setTextureSampler(albedoSampler);
-        
-    TextureSampler roughSampler = createTextureSampler(context);
-    material["isRoughTexture"] -> setInt(0);
-    loadEmptyToTextureSampler(context, roughSampler);
-    material["rough"] -> setFloat(1.0 );
-    material["roughMap"] -> setTextureSampler(roughSampler );
    
     TextureSampler normalSampler = createTextureSampler(context);
     material["isNormalTexture"] -> setInt(0);
     loadEmptyToTextureSampler(context, normalSampler);
     material["normalMap"] -> setTextureSampler(normalSampler );
-    
-    TextureSampler metallicSampler = createTextureSampler(context ); 
-    material["isMetallicTexture"] -> setInt(0 );
-    loadEmptyToTextureSampler(context, metallicSampler);
-    material["metallic"] -> setFloat(0 );
-    material["metallicMap"] -> setTextureSampler(metallicSampler );
-
-
     return material;
 }
 
@@ -62,7 +48,7 @@ Material createWhiteMaterial(Context& context ){
     TextureSampler albedoSampler = createTextureSampler(context);
     material["isAlbedoTexture"] -> setInt(0);   
     loadEmptyToTextureSampler(context, albedoSampler);
-    material["albedo"] -> setFloat(1.0, 1.0, 1.0 ); 
+    material["albedo"] -> setFloat(1.0, 1.0, 1.0 );
     material["albedoMap"] -> setTextureSampler(albedoSampler);
    
     return material;

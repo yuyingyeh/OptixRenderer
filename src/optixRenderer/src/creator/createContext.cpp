@@ -42,7 +42,12 @@ unsigned createContext(
     }
     if(mode > 0){
         maxDepth = 1;
-        sqrt_num_samples = 4;
+        if(mode == 7){
+            sqrt_num_samples = 1;
+        }
+        else{
+            sqrt_num_samples = 4;
+        }
     }
 
     context["max_depth"]->setInt(maxDepth);
