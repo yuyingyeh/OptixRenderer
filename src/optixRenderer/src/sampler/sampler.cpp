@@ -51,9 +51,11 @@ void independentSampling(
         int width, int height,  
         int envWidth, int envHeight, 
         float* imgData,
-        int sampleNum )
+        int sampleNum,
+        int seed )
 {
-    srand(time(NULL) );
+    unsigned int rSeed = (seed >= 0) ? (unsigned int) seed : time(NULL);
+    srand(rSeed );
     context["initSeed"] -> setUint( rand() ); 
     context -> launch(0, width, height);
     getLightOutputBuffer(context, imgData, width, height, envWidth, envHeight, sampleNum ); 

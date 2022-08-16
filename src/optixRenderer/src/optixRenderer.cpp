@@ -209,6 +209,8 @@ int main( int argc, char** argv )
 
     Context context = 0;
 
+    int seed = -1;
+
     for(int i = 0; i < argc; i++){
         if(i == 0){
             continue;
@@ -312,6 +314,13 @@ int main( int argc, char** argv )
         else if(std::string(argv[i] ) == std::string("--writeToMemory") ){
             isWriteToMemory = true;
         }
+        else if(std::string(argv[i] ) == std::string("--seed") ){
+            if(i == argc-1){
+                std::cout<<"Missing input variable"<<std::endl;
+                exit(1);
+            }
+            seed = atoi(argv[++i] );
+        } 
         else{
             std::cout<<"Unrecognizable input command"<<std::endl;
             exit(1);
@@ -388,6 +397,13 @@ int main( int argc, char** argv )
         std::cout<<points[0].intensity.x<<' '<<points[0].intensity.y<<' '<<points[0].intensity.z<<std::endl;
         std::cout<<"Light Position: ";
         std::cout<<points[0].position.x<<' '<<points[0].position.y<<' '<<points[0].position.z<<std::endl;
+    }
+
+    if(seed < 0){
+        std::cout<<"Random seed is not set or negative. Render without a fixed seed."<<std::endl;
+    }
+    else{
+        std::cout<<"Random seed is set as "<<seed<<"."<<std::endl;
     }
 
     // Camera File
@@ -495,7 +511,8 @@ int main( int argc, char** argv )
                 cameraInput.width, cameraInput.height, 
                 envWidth, envHeight, 
                 imgData,
-                cameraInput.sampleNum );
+                cameraInput.sampleNum,
+                seed );
         t = clock() - t;
         std::cout<<"Time: "<<float(t) / CLOCKS_PER_SEC<<'s'<<std::endl;  
 

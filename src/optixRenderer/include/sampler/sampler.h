@@ -21,7 +21,8 @@ void independentSampling(
         int width, int height, 
         int envWidth, int envHeight, 
         float* imgData,
-        int sampleNum );
+        int sampleNum,
+        int seed );
 
 float RMSEAfterScaling(const float* im1, const float* im2, int width, int height, float scale);
 
@@ -33,6 +34,7 @@ bool adaptiveSampling(
         bool noiseLimitEnabled = false,
         int maxIteration = 4, 
         float noiseThreshold = 0.03,
-        unsigned sizeScale = 1 );
+        unsigned sizeScale = 1,
+        int seed = -1 );
 
 #endif
