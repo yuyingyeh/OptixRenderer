@@ -31,12 +31,14 @@ void independentSampling(
         int width, int height, 
         float* imgData, 
         int sampleNum, 
-        unsigned sizeScale)
+        unsigned sizeScale,
+        int seed)
 {
     unsigned bWidth = sizeScale * width;
     unsigned bHeight = sizeScale * height;
 
-    srand(time(NULL) );
+    unsigned int rSeed = (seed >= 0) ? (unsigned int) seed : time(NULL);
+    srand(rSeed );
     context["initSeed"] -> setUint( rand() );
 
     context -> launch(0, bWidth, bHeight);
@@ -72,7 +74,8 @@ bool adaptiveSampling(
         bool noiseLimitEnabled,
         int maxIteration, 
         float noiseThreshold,
-        unsigned sizeScale
+        unsigned sizeScale,
+        int seed
         )
 {
     unsigned bWidth = sizeScale * width;
@@ -89,7 +92,8 @@ bool adaptiveSampling(
     float* tempBuffer2 = new float[pixelNum ];
     
     // Render the first image 
-    srand(time(NULL) );
+    unsigned int rSeed = (seed >= 0) ? (unsigned int) seed : time(NULL);
+    srand(rSeed );
     context["initSeed"] -> setUint( unsigned(0.5 * rand() ) );
     context -> launch(0, bWidth, bHeight );
     getOutputBuffer(context, tempBuffer, width, height, sizeScale );
@@ -104,7 +108,7 @@ bool adaptiveSampling(
     std::cout<<"Scale: "<<scale<<std::endl;
 
     // Render the second image
-    srand(time(NULL) );
+    // srand(time(NULL) );
     context["initSeed"] -> setUint(rand() );
     context -> launch(0, bWidth, bHeight );
     getOutputBuffer(context, tempBuffer2, width, height, sizeScale );
@@ -131,7 +135,7 @@ bool adaptiveSampling(
         // Update sampling parameters
         sampleNum = sampleNum * 2;
         sqrt_num_samples = (unsigned )(sqrt(float(sampleNum ) / float(sizeScale * sizeScale) ) + 1.0);
-        srand(time(NULL) * expo );
+        // srand(time(NULL) * expo );
         context["initSeed"] -> setUint(rand() );
         context["sqrt_num_samples"] -> setUint(sqrt_num_samples );
  
